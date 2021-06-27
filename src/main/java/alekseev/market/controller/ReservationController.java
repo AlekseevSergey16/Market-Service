@@ -1,0 +1,61 @@
+package alekseev.market.controller;
+
+import alekseev.market.dto.ClientDTO;
+import alekseev.market.dto.ReservationDTO;
+import alekseev.market.service.ReservationService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/reservations")
+public class ReservationController {
+
+    private final ReservationService reservationService;
+
+    @Autowired
+    public ReservationController(ReservationService reservationService) {
+        this.reservationService = reservationService;
+    }
+
+    @GetMapping("")
+    public ResponseEntity<List<ReservationDTO>> getReservation() {
+        List<ReservationDTO> reservations = reservationService.getAllReservations();
+
+        return new ResponseEntity<>(reservations, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ReservationDTO> getReservation(@PathVariable int id) {
+        ReservationDTO reservation = reservationService.getReservation(id);
+
+        return new ResponseEntity<>(reservation, HttpStatus.OK);
+    }
+
+    @PostMapping("")
+    public ResponseEntity<ReservationDTO> createReservation(@RequestBody ReservationDTO reservation) {
+
+        reservationService.createReservation(reservation);
+
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ReservationDTO> deleteReservation(@PathVariable int id)  {
+        reservationService.deleteReservation(id);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/client")
+    public ResponseEntity<List<ReservationDTO>> getClientReservation(@RequestBody ClientDTO client,
+                                                                     @RequestParam(value = "from", required = false) String from,
+                                                                     @RequestParam(value = "to", required = false) String to) {
+        List<ReservationDTO> reservations = reservationService.getReservationsByDate(client.getNameClient(), from, to);
+
+        return new ResponseEntity<>(reservations, HttpStatus.OK);
+    }
+}
