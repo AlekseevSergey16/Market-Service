@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -21,9 +22,11 @@ public class ClientDAO implements DAO<ClientDTO> {
     }
 
     @Override
-    public void save(ClientDTO client) {
+    public void save(ClientDTO client) throws SQLException {
         String sql = "INSERT INTO client(name_client) VALUES(?)";
-        jdbcTemplate.update(sql, client.getNameClient());
+        if (jdbcTemplate.update(sql, client.getNameClient()) != 1) {
+            throw new SQLException();
+        }
     }
 
     @Override
@@ -51,14 +54,18 @@ public class ClientDAO implements DAO<ClientDTO> {
     }
 
     @Override
-    public void updateById(int id, ClientDTO client) {
+    public void updateById(int id, ClientDTO client) throws SQLException {
         String sql = "UPDATE client SET name_client=? WHERE client_id=?";
-        jdbcTemplate.update(sql, id);
+        if (jdbcTemplate.update(sql, client.getNameClient(), id) != 1) {
+            throw new SQLException();
+        }
     }
 
     @Override
-    public void deleteById(int id) {
+    public void deleteById(int id) throws SQLException {
         String sql = "DELETE FROM client WHERE client_id=?";
-        jdbcTemplate.update(sql, id);
+        if (jdbcTemplate.update(sql, id) != 1) {
+            throw new SQLException();
+        }
     }
 }

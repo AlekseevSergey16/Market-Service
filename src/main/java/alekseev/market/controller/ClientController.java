@@ -29,6 +29,9 @@ public class ClientController {
     @GetMapping("/{id}")
     public ResponseEntity<ClientDTO> getClient(@PathVariable int id) {
         ClientDTO clientDTO = clientService.getClient(id);
+        if (clientDTO == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
 
         return new ResponseEntity<>(clientDTO, HttpStatus.OK);
     }

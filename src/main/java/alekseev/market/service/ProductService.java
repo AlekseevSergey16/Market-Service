@@ -5,9 +5,9 @@ import alekseev.market.dto.ProductDTO;
 import java.util.List;
 
 public interface ProductService {
-    void saveProduct(ProductDTO product);
+    int saveProduct(ProductDTO product);
     ProductDTO getProduct(int id);
     List<ProductDTO> getAllProducts();
-    void update(int id, ProductDTO productDTO);
-    void delete(int id);
+    int update(int id, ProductDTO productDTO);
+    int delete(int id);
 }

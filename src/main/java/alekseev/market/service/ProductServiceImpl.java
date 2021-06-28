@@ -6,8 +6,10 @@ import alekseev.market.dto.CategoryDTO;
 import alekseev.market.dto.ProductDTO;
 import org.springframework.stereotype.Service;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -21,19 +23,28 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void saveProduct(ProductDTO productDTO) {
-        productDAO.save(productDTO);
-        int productId = productDAO.findIdByTitleAndPrice(productDTO);
-        List<Integer> categoryIds = new ArrayList<>();
-        for (CategoryDTO category: productDTO.getCategories()) {
-            categoryIds.add(categoryDAO.findIdByNameCategory(category.getNameCategory()));
+    public int saveProduct(ProductDTO productDTO) {
+        try {
+            productDAO.save(productDTO);
+            int productId = productDAO.findIdByTitleAndPrice(productDTO);
+            List<Integer> categoryIds = new ArrayList<>();
+            for (CategoryDTO category: productDTO.getCategories()) {
+                categoryIds.add(categoryDAO.findIdByNameCategory(category.getNameCategory()));
+            }
+            productDAO.saveProductWithCategory(productId, categoryIds);
+            return 1;
+        } catch (SQLException | NoSuchElementException e) {
+            return 0;
         }
-        productDAO.saveProductWithCategory(productId, categoryIds);
     }
 
     @Override
     public ProductDTO getProduct(int id) {
-        return productDAO.findById(id);
+        try {
+            return productDAO.findById(id);
+        } catch (NoSuchElementException e) {
+            return null;
+        }
     }
 
     @Override
@@ -42,14 +53,23 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void update(int id, ProductDTO productDTO) {
-        productDAO.updateById(id, productDTO);
+    public int update(int id, ProductDTO productDTO) {
+        try {
+            productDAO.updateById(id, productDTO);
+            return 1;
+        } catch (SQLException e) {
+            return 0;
+        }
     }
 
     @Override
-    public void delete(int id) {
-        productDAO.deleteById(id);
+    public int delete(int id) {
+        try {
+            productDAO.deleteById(id);
+            return 1;
+        } catch (SQLException e) {
+            return 0;
+        }
     }
-
 
 }

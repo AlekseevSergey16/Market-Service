@@ -1,12 +1,12 @@
 package alekseev.market.dao;
 
+import java.sql.SQLException;
 import java.util.List;
-import java.util.Optional;
 
 public interface DAO <T> {
-    void save(T t);
+    void save(T t) throws SQLException;
     T findById(int id);
     <S extends T> List<S> findAll();
-    void updateById(int id, T t);
-    void deleteById(int id);
+    void updateById(int id, T t) throws SQLException;
+    void deleteById(int id) throws SQLException;
 }

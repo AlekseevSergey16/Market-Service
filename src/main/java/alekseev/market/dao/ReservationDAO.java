@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,9 +25,11 @@ public class ReservationDAO implements DAO<ReservationDTO> {
     }
 
     @Override
-    public void save(ReservationDTO reservation) {
+    public void save(ReservationDTO reservation) throws SQLException {
         String sql = "INSERT INTO reservation(client_id, reservation_date) VALUES ((SELECT client_id FROM client WHERE name_client=?), ?)";
-        jdbcTemplate.update(sql, reservation.getClient().getNameClient(), reservation.getReservationDate());
+        if (jdbcTemplate.update(sql, reservation.getClient().getNameClient(), reservation.getReservationDate()) != 1) {
+            throw new SQLException();
+        }
 
         String sql2 = "SELECT reservation_id FROM reservation WHERE reservation.client_id = (SELECT client_id FROM client WHERE name_client=?) " +
                 "AND reservation_date=?";
@@ -35,7 +38,9 @@ public class ReservationDAO implements DAO<ReservationDTO> {
         String sql3 = "INSERT INTO reservation_product(reservation_id, product_id)\n" +
                 "VALUES (?, (SELECT product_id FROM product WHERE title=? AND price=?))";
         for (ProductDTO product : reservation.getProducts()) {
-            jdbcTemplate.update(sql3, reservationId, product.getTitle(), product.getPrice());
+            if (jdbcTemplate.update(sql3, reservationId, product.getTitle(), product.getPrice()) != 1) {
+                throw new SQLException();
+            }
         }
     }
 
@@ -111,16 +116,16 @@ public class ReservationDAO implements DAO<ReservationDTO> {
 
     @Override
     public void updateById(int id, ReservationDTO reservationDTO) {
-
+        // to do
     }
 
-
-
     @Override
-    public void deleteById(int id) {
+    public void deleteById(int id) throws SQLException {
         String sql = "DELETE FROM reservation_product WHERE reservation_id=?";
-        jdbcTemplate.update(sql, id);
         String sql2 = "DELETE FROM reservation WHERE reservation_id=?";
-        jdbcTemplate.update(sql2, id);
+        jdbcTemplate.update(sql, id);
+        if (jdbcTemplate.update(sql2, id) != 1) {
+            throw new SQLException();
+        }
     }
 }

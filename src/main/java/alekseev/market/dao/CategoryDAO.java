@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.sql.SQLException;
 import java.util.List;
 
 @Repository
@@ -21,9 +22,11 @@ public class CategoryDAO implements DAO<CategoryDTO> {
     }
 
     @Override
-    public void save(CategoryDTO category) {
+    public void save(CategoryDTO category) throws SQLException {
         String sql = "INSERT INTO category (name_category) VALUES (?)";
-        jdbcTemplate.update(sql, category.getNameCategory());
+        if(jdbcTemplate.update(sql, category.getNameCategory()) != 1) {
+            throw new SQLException();
+        }
     }
 
     @Override
@@ -61,16 +64,20 @@ public class CategoryDAO implements DAO<CategoryDTO> {
     }
 
     @Override
-    public void updateById(int id, CategoryDTO category) {
+    public void updateById(int id, CategoryDTO category) throws SQLException {
         String sql = "UPDATE category SET name_category=? WHERE category_id=?";
-        jdbcTemplate.update(sql, category.getNameCategory(), id);
+        if (jdbcTemplate.update(sql, category.getNameCategory(), id) != 1) {
+            throw new SQLException();
+        }
     }
 
     @Override
-    public void deleteById(int id) {
+    public void deleteById(int id) throws SQLException {
         String sql1 = "DELETE FROM product_category WHERE category_id=?";
         String sq2 = "DELETE FROM category WHERE category_id=?";
         jdbcTemplate.update(sql1, id);
-        jdbcTemplate.update(sq2, id);
+        if (jdbcTemplate.update(sq2, id) != 1) {
+            throw new SQLException();
+        }
     }
 }

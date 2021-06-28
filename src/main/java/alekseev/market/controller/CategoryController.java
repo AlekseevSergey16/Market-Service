@@ -31,27 +31,39 @@ public class CategoryController {
     @GetMapping("/{id}")
     public ResponseEntity<CategoryWithProductDTO> getCategories(@PathVariable int id) {
         CategoryWithProductDTO category = categoryService.getCategory(id);
+        if (category == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
 
         return new ResponseEntity<>(category, HttpStatus.OK);
     }
 
     @PostMapping()
     public ResponseEntity<CategoryDTO> createCategory(@RequestBody CategoryDTO categoryDTO) {
-        categoryService.saveCategory(categoryDTO);
+        int status = categoryService.saveCategory(categoryDTO);
+        if (status != 1) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
 
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<String> updateCategory(@RequestBody CategoryDTO categoryDTO, @PathVariable int id) {
-        categoryService.updateCategory(id, categoryDTO);
+        int status = categoryService.updateCategory(id, categoryDTO);
+        if (status != 1) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteCategory(@PathVariable int id)  {
-        categoryService.deleteCategory(id);
+        int status = categoryService.deleteCategory(id);
+        if (status != 1) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

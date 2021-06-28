@@ -24,6 +24,9 @@ public class ReservationController {
     @GetMapping("")
     public ResponseEntity<List<ReservationDTO>> getReservation() {
         List<ReservationDTO> reservations = reservationService.getAllReservations();
+        if (reservations.isEmpty()) {
+            return new ResponseEntity<>(reservations, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 
         return new ResponseEntity<>(reservations, HttpStatus.OK);
     }
@@ -31,6 +34,9 @@ public class ReservationController {
     @GetMapping("/{id}")
     public ResponseEntity<ReservationDTO> getReservation(@PathVariable int id) {
         ReservationDTO reservation = reservationService.getReservation(id);
+        if (reservation == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
 
         return new ResponseEntity<>(reservation, HttpStatus.OK);
     }
@@ -38,14 +44,22 @@ public class ReservationController {
     @PostMapping("")
     public ResponseEntity<ReservationDTO> createReservation(@RequestBody ReservationDTO reservation) {
 
-        reservationService.createReservation(reservation);
+        int status = reservationService.createReservation(reservation);
+
+        if (status != 1) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
 
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ReservationDTO> deleteReservation(@PathVariable int id)  {
-        reservationService.deleteReservation(id);
+        int status = reservationService.deleteReservation(id);
+
+        if (status != 1) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

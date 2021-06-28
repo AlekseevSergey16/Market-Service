@@ -5,8 +5,10 @@ import alekseev.market.dto.ReservationDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 public class ReservationServiceImpl implements ReservationService {
@@ -19,13 +21,22 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public void createReservation(ReservationDTO reservationDTO) {
-        reservationDAO.save(reservationDTO);
+    public int createReservation(ReservationDTO reservationDTO) {
+        try {
+            reservationDAO.save(reservationDTO);
+            return 1;
+        } catch (SQLException e) {
+            return 0;
+        }
     }
 
     @Override
     public ReservationDTO getReservation(int id) {
-        return reservationDAO.findById(id);
+        try {
+            return reservationDAO.findById(id);
+        } catch (NoSuchElementException e) {
+            return null;
+        }
     }
 
     @Override
@@ -34,8 +45,13 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public void deleteReservation(int id) {
-        reservationDAO.deleteById(id);
+    public int deleteReservation(int id) {
+        try {
+            reservationDAO.deleteById(id);
+            return 1;
+        } catch (SQLException e) {
+            return 0;
+        }
     }
 
     @Override

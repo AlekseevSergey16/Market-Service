@@ -6,8 +6,10 @@ import alekseev.market.dto.ProductWithoutCategoryDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 public class ClientServiceImpl implements ClientService {
@@ -20,13 +22,22 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public void saveClient(ClientDTO clientDTO) {
-        clientDAO.save(clientDTO);
+    public int saveClient(ClientDTO clientDTO) {
+        try {
+            clientDAO.save(clientDTO);
+        } catch (SQLException e) {
+            return 0;
+        }
+        return 1;
     }
 
     @Override
     public ClientDTO getClient(int id) {
-        return clientDAO.findById(id);
+        try {
+            return clientDAO.findById(id);
+        } catch (NoSuchElementException e) {
+            return null;
+        }
     }
 
     @Override
@@ -35,13 +46,23 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public void updateClient(int id, ClientDTO clientDTO) {
-        clientDAO.updateById(id, clientDTO);
+    public int updateClient(int id, ClientDTO clientDTO) {
+        try {
+            clientDAO.updateById(id, clientDTO);
+        } catch (SQLException e) {
+            return 0;
+        }
+        return 1;
     }
 
     @Override
-    public void deleteClient(int id) {
-        clientDAO.deleteById(id);
+    public int deleteClient(int id) {
+        try {
+            clientDAO.deleteById(id);
+        } catch (SQLException e) {
+            return 0;
+        }
+        return 1;
     }
 
     @Override

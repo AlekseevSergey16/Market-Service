@@ -7,7 +7,7 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
+import java.sql.SQLException;
 import java.util.List;
 
 @Repository
@@ -21,14 +21,18 @@ public class ProductDAO implements DAO<ProductDTO> {
     }
 
     @Override
-    public void save(ProductDTO product) {
-        jdbcTemplate.update("INSERT INTO product (title, price) VALUES (?, ?)", product.getTitle(), product.getPrice());
+    public void save(ProductDTO product) throws SQLException {
+        if (jdbcTemplate.update("INSERT INTO product (title, price) VALUES (?, ?)", product.getTitle(), product.getPrice()) != 1) {
+            throw new SQLException();
+        }
     }
 
-    public void saveProductWithCategory(int productId, List<Integer> categoryIds) {
+    public void saveProductWithCategory(int productId, List<Integer> categoryIds) throws SQLException {
         String sql = "INSERT INTO product_category (product_id, category_id) VALUES (?, ?)";
         for (int categoryId: categoryIds) {
-            jdbcTemplate.update(sql, productId, categoryId);
+            if (jdbcTemplate.update(sql, productId, categoryId) != 1) {
+                throw new SQLException();
+            }
         }
     }
 
@@ -71,30 +75,29 @@ public class ProductDAO implements DAO<ProductDTO> {
     }
 
     @Override
-    public void updateById(int id, ProductDTO product) {
+    public void updateById(int id, ProductDTO product) throws SQLException {
         String sql = "UPDATE product SET title=?, price=? WHERE product_id=?";
-        jdbcTemplate.update(sql, product.getTitle(), product.getPrice(), product.getProductId());
-        String sql2 = "SELECT category_id FROM category WHERE name_category=?";
-        List<Integer> categoryIds = new ArrayList<>();
-        for (CategoryDTO category: product.getCategories()) {
-            categoryIds.add(jdbcTemplate.query(sql2, (rs, rowNum) -> rs.getInt("category_id"), category)
-                    .stream().findAny().orElseThrow());
+        if (jdbcTemplate.update(sql, product.getTitle(), product.getPrice(), id) != 1) {
+            throw new SQLException();
         }
-        String sql22 = "DELETE FROM product_category WHERE product_id=?";
-        jdbcTemplate.update(sql22, id);
+        String sql2 = "DELETE FROM product_category WHERE product_id=?";
+        jdbcTemplate.update(sql2, id);
 
-        String sql12 = "INSERT INTO product_category (product_id, category_id) VALUES (?, ?)";
-        for (int categoryId : categoryIds) {
-            jdbcTemplate.update(sql12, id, categoryId);
+        String sql3 = "INSERT INTO product_category (product_id, category_id) VALUES (?, (SELECT category_id FROM category WHERE name_category=?))";
+        for (CategoryDTO category : product.getCategories()) {
+            if (jdbcTemplate.update(sql3, id, category.getNameCategory()) != 1) {
+                throw new SQLException();
+            }
         }
     }
 
     @Override
-    public void deleteById(int id) {
-        String sql = "DELETE FROM product WHERE product_id=?";
-        String sql2 = "DELETE FROM product_category WHERE product_id=?";
-        jdbcTemplate.update(sql2, id);
+    public void deleteById(int id) throws SQLException {
+        String sql = "DELETE FROM product_category WHERE product_id=?";
+        String sql2 = "DELETE FROM product WHERE product_id=?";
         jdbcTemplate.update(sql, id);
+        if (jdbcTemplate.update(sql2, id) != 1) {
+            throw new SQLException();
+        }
     }
-
 }

@@ -6,6 +6,7 @@ import alekseev.market.dto.CategoryWithProductDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -20,13 +21,22 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public void saveCategory(CategoryDTO category) {
-        categoryDAO.save(category);
+    public int saveCategory(CategoryDTO category) {
+        try {
+            categoryDAO.save(category);
+        } catch (SQLException e) {
+            return 0;
+        }
+        return 1;
     }
 
     @Override
     public CategoryWithProductDTO getCategory(int id) {
-        return categoryDAO.findById(id);
+        try {
+            return categoryDAO.findById(id);
+        } catch (NoSuchElementException e) {
+            return null;
+        }
     }
 
     @Override
@@ -35,12 +45,22 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public void updateCategory(int id, CategoryDTO category) {
-        categoryDAO.updateById(id, category);
+    public int updateCategory(int id, CategoryDTO category) {
+        try {
+            categoryDAO.updateById(id, category);
+        } catch (SQLException e) {
+            return 0;
+        }
+        return 1;
     }
 
     @Override
-    public void deleteCategory(int id) {
-        categoryDAO.deleteById(id);
+    public int deleteCategory(int id) {
+        try {
+            categoryDAO.deleteById(id);
+        } catch (SQLException e) {
+            return 0;
+        }
+        return 1;
     }
 }
