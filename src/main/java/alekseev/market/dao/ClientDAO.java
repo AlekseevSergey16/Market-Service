@@ -64,6 +64,10 @@ public class ClientDAO implements DAO<ClientDTO> {
     @Override
     public void deleteById(int id) throws SQLException {
         String sql = "DELETE FROM client WHERE client_id=?";
+        String sql2 = "DELETE FROM reservation_product WHERE reservation_id=(SELECT reservation_id FROM reservation WHERE client_id=?);\n" +
+                "DELETE FROM reservation WHERE client_id=?;";
+        jdbcTemplate.update(sql2, id, id);
+
         if (jdbcTemplate.update(sql, id) != 1) {
             throw new SQLException();
         }
